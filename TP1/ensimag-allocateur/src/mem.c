@@ -13,7 +13,16 @@
 
 void *zone_memoire = 0;
 
+
 /* ecrire votre code ici */
+struct block_list {
+	void *free_zone; 
+	struct block_list *suivant;
+};
+
+typedef struct block_list block_list;
+
+block_list TZL[BUDDY_MAX_INDEX + 1];
 
 int 
 mem_init()
@@ -27,7 +36,8 @@ mem_init()
     }
 
   /* ecrire votre code ici */
-
+  TZL[BUDDY_MAX_INDEX].free_zone = zone_memoire;
+  TZL[BUDDY_MAX_INDEX].suivant = NULL;
   return 0;
 }
 
