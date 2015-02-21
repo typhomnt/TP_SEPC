@@ -34,12 +34,12 @@ next_pow_2(unsigned long size){
 static int
 next_pow_2_index(unsigned long size){
 	unsigned long res = 1;
-	int index = 0;
+	int size_index = 0;
 	while(res < size){
 		res = 2*res;
-		index++;
+		size_index++;
 	}
-	return index;
+	return size_index;
 }
 
 static void 
@@ -51,6 +51,7 @@ add_head(block_list* block, int size_index){
 
 static void*
 subdivizion(unsigned long size, unsigned long requested_size, int index){
+	// if there is one free zone with the size
 	if(TZL[index] != NULL){
 		if(size == requested_size){
 			void *block = TZL[index];
@@ -79,6 +80,7 @@ subdivizion(unsigned long size, unsigned long requested_size, int index){
 	}
 }
 //size must be divisible by 2
+// must be divisible by 2 or must be a power of 2 ??
 static void*
 get_block(unsigned long size, int index){
 	if(size % 2 != 0)
@@ -112,12 +114,12 @@ void *
 mem_alloc(unsigned long size)
 {
   /*  ecrire votre code ici */
-	//the size must be divisible by 2
+  //the size must be divisible by 2
 	if(size > ALLOC_MEM_SIZE)
 		return 0;
 	unsigned long size2 = next_pow_2(size);
 	int pow_2_index = next_pow_2_index(size);
-        return get_block(size2,pow_2_index);
+	return get_block(size2,pow_2_index);
 }
 
 int 
@@ -128,6 +130,15 @@ mem_free(void *ptr, unsigned long size)
 	 on ne pourrai pas stocker l'addresse de la prochaine case libre mais on peut tout de même faire:
 	si size < sizeof(void*) chercher si le buddy de cette case est libre ; si c'est le cas on fusionne les deux case
 	si la nouvelle taille de cette zone est suffisant */
+
+	/* Algo :
+	- on désalloue la zone mémoire
+	- on cherche le buddy avec (adresse xor size)
+	- tant qu'il y a un buddy libre (et que size < alloc_mem_size):
+		- on fusionne la zone avec son buddy : on enlève le buddy et la zone de leur liste et on ajoute
+		le résultat à la liste supérieure
+		- on cherche un buddy libre de taille supérieure
+	*/
 	return 0;
 }
 
