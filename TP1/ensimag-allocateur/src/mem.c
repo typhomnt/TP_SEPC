@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
 #include "mem.h"
 
 /** squelette du TP allocateur memoire */
@@ -42,6 +43,21 @@ next_pow_2_index(unsigned long size){
 	return size_index;
 }
 
+//size must be a power of 2
+static bool
+invalid_free(void *ptr,unsigned long size){
+	block_list *temp = NULL;
+	for(int i = 0 ; i <= BUDDY_MAX_INDEX ; i++){
+		temp = TZL[i];
+		while(temp != NULL){
+			if((unsigned long)ptr + size > (unsigned long)temp)
+				return true;
+			temp = temp->suivant;
+		}
+	}
+	return false;
+}
+
 static void 
 add_head(block_list* block, int size_index){
 	block_list* temp = TZL[size_index];
@@ -49,6 +65,59 @@ add_head(block_list* block, int size_index){
 	TZL[size_index]->suivant = temp;
 }
 
+static bool
+free_buddy(block_list* block, int index,unsigned long size){
+	block_list *temp = TZL[index];
+	block_list *buddy = (block_list*)((unsigned long)block^size);
+	while(temp != NULL){
+		if(temp == buddy)
+			return true;
+		temp = temp->suivant;
+	}
+	return false;
+}
+
+static int
+defrag(block_list* block, int index,unsigned long size){
+	block_list *temp = TZL[index];
+	block_list *buddy = (block_list*)((unsigned long)block^size);
+	int block_defrag = 0;
+	int buddy_defrag = 0;
+	//Case where the block or its buddy is the head
+	if(temp == block){
+		block_defrag = 1;
+		TZL[index] = TZL[index]->suivant;
+	}
+	if(temp == buddy){
+		buddy_defrag = 1;
+		TZL[index] = TZL[index]->suivant;
+	}
+	while(block_defrag == 0 && buddy_defrag == 0){
+		//if we have this case it means that we did an error before (mem_free)
+		if(temp == NULL)
+			return -1;
+		//we delete either the block or the buddy or we go to next free block
+		if(temp->suivant == block){
+			block_defrag = 1;
+			temp->suivant = temp->suivant->suivant;
+		}
+		else if(temp->suivant == buddy){
+			buddy_defrag = 1;
+			temp->suivant = temp->suivant->suivant;
+		}
+		else {
+			temp = temp->suivant ;
+		}
+	}
+	//we add a free zone of 2*block_size
+	if(block < buddy){
+		add_head(block, index + 1);
+	}
+	else {
+		add_head(buddy, index + 1);
+	}
+	return 0;
+}
 static void*
 subdivizion(unsigned long size, unsigned long requested_size, int index){
 	// if there is one free zone with the size
@@ -79,8 +148,8 @@ subdivizion(unsigned long size, unsigned long requested_size, int index){
 		return subdivizion(2*size, requested_size, index + 1);
 	}
 }
-//size must be divisible by 2
-// must be divisible by 2 or must be a power of 2 ??
+
+// must be divisible by 2 or must be a power of 2 
 static void*
 get_block(unsigned long size, int index){
 	if(size % 2 != 0)
@@ -115,7 +184,7 @@ mem_alloc(unsigned long size)
 {
   /*  ecrire votre code ici */
   //the size must be divisible by 2
-	if(size > ALLOC_MEM_SIZE)
+	if(size > ALLOC_MEM_SIZE || size < sizeof(void *))
 		return 0;
 	unsigned long size2 = next_pow_2(size);
 	int pow_2_index = next_pow_2_index(size);
@@ -139,6 +208,19 @@ mem_free(void *ptr, unsigned long size)
 		le résultat à la liste supérieure
 		- on cherche un buddy libre de taille supérieure
 	*/
+	unsigned long size2 = next_pow_2(size);
+	int index = next_pow_2_index(size);
+	//if we free a zone which run over a free zone
+	if(invalid_free(ptr, size2))
+	   return -1;
+	block_list *new_block = ptr;
+	add_head(new_block, index);
+	while(free_buddy(new_block, index, size2) && size2 < ALLOC_MEM_SIZE){
+		if(defrag(new_block, index, size2) == -1)
+			return -1;
+		index++;
+		size2 = 2*size2;
+	}
 	return 0;
 }
 
