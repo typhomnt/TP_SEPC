@@ -1,0 +1,6 @@
+/home/omid/Documents/2A/SEPC/TP_SEPC/TP1/ensimag-allocateur/build/CMakeFiles/allocphy.dir
+/home/omid/Documents/2A/SEPC/TP_SEPC/TP1/ensimag-allocateur/build/CMakeFiles/alloctest.dir
+/home/omid/Documents/2A/SEPC/TP_SEPC/TP1/ensimag-allocateur/build/CMakeFiles/check.dir
+/home/omid/Documents/2A/SEPC/TP_SEPC/TP1/ensimag-allocateur/build/gtest/CMakeFiles/gtest.dir
+/home/omid/Documents/2A/SEPC/TP_SEPC/TP1/ensimag-allocateur/build/gtest/CMakeFiles/gtest_main.dir
+/home/omid/Documents/2A/SEPC/TP_SEPC/TP1/ensimag-allocateur/build/CMakeFiles/memshell.dir

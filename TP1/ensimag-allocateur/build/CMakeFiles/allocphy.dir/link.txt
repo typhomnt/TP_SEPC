@@ -1,0 +1,1 @@
+/usr/bin/gcc  -fPIC -g -Wall -Werror -std=gnu99   -shared -Wl,-soname,liballocphy.so -o liballocphy.so CMakeFiles/allocphy.dir/src/mem.c.o 

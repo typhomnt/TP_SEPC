@@ -44,12 +44,16 @@ next_pow_2_index(unsigned long size){
 }
 
 //size must be a power of 2
+// Verifie si on peut desallou
 static bool
 invalid_free(void *ptr,unsigned long size){
 	block_list *temp = NULL;
 	for(int i = 0 ; i <= BUDDY_MAX_INDEX ; i++){
 		temp = TZL[i];
 		while(temp != NULL){
+			/* on verifie qu'il n'y a pas de debordement sur
+			une case deja libre (ie temp) lors du free. 
+			Si non, on passe au bloc suivant de meme taille */
 			if((unsigned long)ptr + size > (unsigned long)temp)
 				return true;
 			temp = temp->suivant;
