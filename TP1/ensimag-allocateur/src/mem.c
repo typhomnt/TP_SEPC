@@ -13,8 +13,6 @@
 
 void *zone_memoire = 0;
 
-
-/* ecrire votre code ici */
 struct block_list {
     struct block_list *suivant;
 };
@@ -43,11 +41,16 @@ next_pow_2_index(unsigned long size){
     return size_index;
 }
 
-//size must be a power of 2
-// Verifie si on peut desallou
+//size doit être une puissance de deux
+/*que l' on peut effectivement libérer la zone mémoire et 
+qu'il n'y a pas de débordement sur une case libre*/
 static bool
 invalid_free(void *ptr,unsigned long size){
     block_list *temp;
+    //on verifie en plus que ptr est bien une addresse valide (puissance de 2)
+    //(en effet tout ce qui est alloué est une puissance de 2, on ne peut pas libérer un champ qui n'en n'est pas une)
+    if((ptr - zone_memoire) % 2 != 0)
+	return true;
     for(int i = 0 ; i <= BUDDY_MAX_INDEX ; i++){
 	temp = TZL[i];
 	while(temp != NULL){
@@ -61,7 +64,7 @@ invalid_free(void *ptr,unsigned long size){
     }
     return false;
 }
-
+//Ajoute block en tête de liste de TZL[size_index]
 static void 
 add_head(block_list* block, int size_index){
     block_list* temp = TZL[size_index];
@@ -69,6 +72,8 @@ add_head(block_list* block, int size_index){
     TZL[size_index]->suivant = temp;
 }
 
+//Renvoie true si le buddy du block libéré (qui est en tête de liste à ce moment là) est libre
+//Renvoie false sinon
 static bool
 free_buddy(int index,unsigned long size){
     block_list *temp = TZL[index];
@@ -81,6 +86,8 @@ free_buddy(int index,unsigned long size){
     return false;
 }
 
+//fusionne deux buddy pour en faire une case libre de taille size*2
+//cette fonction n'est pas récursive, mem_alloc fait un appel itératif à cette fonction
 static int
 defrag(int index,unsigned long size){
     block_list *temp = TZL[index];
@@ -88,7 +95,7 @@ defrag(int index,unsigned long size){
     block_list *block = TZL[index];
     int buddy_defrag = 0;
     while(buddy_defrag == 0){
-	//if we have this case it means that we did an error before (mem_free)
+	//if we have this case it means that we did an internal error before (mem_free)
 	if(temp == NULL)
 	    return -1;
 	//we delete either the block and the buddy or we go to next free block
@@ -110,6 +117,11 @@ defrag(int index,unsigned long size){
     }
     return 0;
 }
+
+/*Subdivize un block de taille size s'il en existe un et on appel la fonction avec size/2 pour faire une subdivision récursive.
+Si le block  est de taille requise il n'y a pas de subdivision et on retourne ce dernier.
+Si il n'y a pas de block libre de taille size on appelle la fonction avec size*2.
+Si size == ALLOC_MEM_SIZE et TZL[BUDDY_MAX_INDEX] = NULL alors on a pas trouvé de case libre, l'allocation est impossible*/
 static void*
 subdivizion(unsigned long size, unsigned long requested_size, int index){
     // if there is one free zone with the size
@@ -144,7 +156,8 @@ subdivizion(unsigned long size, unsigned long requested_size, int index){
     }
 }
 
-// must be divisible by 2 or must be a power of 2 
+// récupère le block alloué ou une erreur (0)
+// size doit être une puissance de 2
 static void*
 get_block(unsigned long size, int index){
     if(size % 2 != 0)
@@ -163,8 +176,6 @@ mem_init()
 	    perror("mem_init:");
 	    return -1;
 	}
-
-    /* ecrire votre code ici */
     TZL[BUDDY_MAX_INDEX] = zone_memoire;
     TZL[BUDDY_MAX_INDEX]->suivant = NULL;
     for(int i = 0 ; i < BUDDY_MAX_INDEX ; i++)
@@ -175,8 +186,6 @@ mem_init()
 void *
 mem_alloc(unsigned long size)
 {
-    /*  ecrire votre code ici */
-    //the size must be divisible by 2
     if(size > ALLOC_MEM_SIZE || size <= 0)
 	return 0;
     if(size < sizeof(block_list *)){
@@ -224,8 +233,6 @@ mem_free(void *ptr, unsigned long size)
 int
 mem_destroy()
 {
-    /* ecrire votre code ici */
-
     for(int i = 0 ; i <= BUDDY_MAX_INDEX ; i++)
 	TZL[i] = NULL;
     free(zone_memoire);
