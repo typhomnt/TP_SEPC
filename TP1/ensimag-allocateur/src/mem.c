@@ -54,7 +54,7 @@ invalid_free(void *ptr,unsigned long size){
 	    /* on verifie qu'il n'y a pas de debordement sur
 	       une case deja libre (ie temp) lors du free. 
 	       Si non, on passe au bloc suivant de meme taille */
-	    if(ptr == temp)
+	    if(ptr <= (void*)temp && (unsigned long)ptr + size > (unsigned long)temp)
 		return true;
 	    temp = temp->suivant;
 	}
@@ -72,7 +72,7 @@ add_head(block_list* block, int size_index){
 static bool
 free_buddy(int index,unsigned long size){
     block_list *temp = TZL[index];
-    block_list *buddy = (block_list*)((unsigned long)temp^size);
+    block_list *buddy = (block_list*)(((unsigned long)(((void*)temp - zone_memoire))^size) + (unsigned long)zone_memoire);
     while(temp != NULL){
 	if(temp == buddy)
 	    return true;
@@ -84,7 +84,7 @@ free_buddy(int index,unsigned long size){
 static int
 defrag(int index,unsigned long size){
     block_list *temp = TZL[index];
-    block_list *buddy = (block_list*)((unsigned long)temp^size);
+    block_list *buddy = (block_list*)(((unsigned long)(((void*)temp - zone_memoire))^size) + (unsigned long)zone_memoire);
     block_list *block = TZL[index];
     int buddy_defrag = 0;
     while(buddy_defrag == 0){
