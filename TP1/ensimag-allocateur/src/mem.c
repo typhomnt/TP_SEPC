@@ -21,6 +21,7 @@ typedef struct block_list block_list;
 
 block_list *TZL[BUDDY_MAX_INDEX + 1];
 
+//retourne la première puissance de deux après size 
 static unsigned long 
 next_pow_2(unsigned long size){
     unsigned long res = 1;
@@ -29,7 +30,8 @@ next_pow_2(unsigned long size){
     }
     return res;
 }
-//a factoriser car deux fois la même fonction
+
+//retourne l'indice de puissance de la première puissance de deux après size
 static int
 next_pow_2_index(unsigned long size){
     unsigned long res = 1;
@@ -95,10 +97,10 @@ defrag(int index,unsigned long size){
     block_list *block = TZL[index];
     int buddy_defrag = 0;
     while(buddy_defrag == 0){
-	//if we have this case it means that we did an internal error before (mem_free)
+        //Si on tombe dans ce cas ci c'est que l'on a fait une erreur interne avant (mem_free)
 	if(temp == NULL)
 	    return -1;
-	//we delete either the block and the buddy or we go to next free block
+	//On détruit le buddy et le block concerné ou on va au block suivant
 	else if(temp->suivant == buddy){
 	    buddy_defrag = 1;
 	    temp->suivant = temp->suivant->suivant;
@@ -108,7 +110,7 @@ defrag(int index,unsigned long size){
 	    temp = temp->suivant ;
 	}
     }
-    //we add a free zone of 2*block_size
+    //On ajoute une zone libre de taille 2*size
     if(block < buddy){
 	add_head(block, index + 1);
     }
@@ -124,34 +126,33 @@ Si il n'y a pas de block libre de taille size on appelle la fonction avec size*2
 Si size == ALLOC_MEM_SIZE et TZL[BUDDY_MAX_INDEX] = NULL alors on a pas trouvé de case libre, l'allocation est impossible*/
 static void*
 subdivizion(unsigned long size, unsigned long requested_size, int index){
-    // if there is one free zone with the size
+    // S'il y a une zone libre de taille size 
     if(TZL[index] != NULL){
 	if(size == requested_size){
 	    void *block = TZL[index];
-	    //the block is no longer free
+	    //le block est alloué et n'est plus libre
 	    TZL[index] = TZL[index]->suivant;
 	    return block;
 	}
 	else {
-	    //we delete TZL[(int)log2(size)] from the free blocks of log2(size)
+	    //On libère TZL[index] des zones libres de taille size
 	    block_list *block = TZL[index];
 	    TZL[index] = TZL[index]->suivant;
-	    //we add the buddy first
+	    //On ajoute d'abord le buddy...
 	    block_list *buddy = (void*)block + size/2;
-
 	    add_head(buddy, index - 1);
-	    //then the block pointed by TZL[(int)log2(size)]
+	    //Puis block dans les zones libre de taille size/2
 	    add_head(block, index - 1);
 	    return subdivizion(size/2,requested_size, index - 1);
 	}
 		
     }
     else if (size == ALLOC_MEM_SIZE){
-	//we couldn't find a free block
+	//Il n'y a pas de zone libre disponoble pour requested size
 	return 0;
     }
     else {
-	//we try to find a free block of 2*size in order to subdivize him
+	//On essaye de trouver une zone libre de taille 2*size dans le but de le subdiviser
 	return subdivizion(2*size, requested_size, index + 1);
     }
 }
@@ -186,8 +187,11 @@ mem_init()
 void *
 mem_alloc(unsigned long size)
 {
+    //on vérifie que size est une valeur valide
     if(size > ALLOC_MEM_SIZE || size <= 0)
 	return 0;
+    /*si size est plus petite que la taille minimale d'une zone libre (sizeof(block_list*)) 
+      on l'affecte à cette taille minimale */
     if(size < sizeof(block_list *)){
 	size = sizeof(block_list *);
     }
@@ -215,7 +219,7 @@ mem_free(void *ptr, unsigned long size)
     }
     unsigned long size2 = next_pow_2(size);
     int index = next_pow_2_index(size);
-    //if we free a zone which run over a free zone
+    //on vérifie si on fait une libération valide
     if(invalid_free(ptr, size2))
 	return -1;
     block_list *new_block = ptr;
