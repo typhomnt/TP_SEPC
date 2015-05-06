@@ -1,0 +1,53 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec2595640477/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2595640477.dir/build.make CMakeFiles/cmTryCompileExec2595640477.dir/build
+make[1]: entrant dans le répertoire « /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp »
+/usr/bin/cmake -E cmake_progress_report /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2595640477.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec2595640477.dir/CheckSymbolExists.c.o   -c /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTryCompileExec2595640477
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2595640477.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec2595640477.dir/CheckSymbolExists.c.o  -o cmTryCompileExec2595640477 -rdynamic 
+CMakeFiles/cmTryCompileExec2595640477.dir/CheckSymbolExists.c.o: dans la fonction « main »:
+CheckSymbolExists.c:(.text+0xa): référence indéfinie vers « pthread_create »
+collect2: error: ld returned 1 exit status
+make[1]: quittant le répertoire « /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp »
+make[1]: *** [cmTryCompileExec2595640477] Erreur 1
+make: *** [cmTryCompileExec2595640477/fast] Erreur 2
+
+File /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec2128053203/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2128053203.dir/build.make CMakeFiles/cmTryCompileExec2128053203.dir/build
+make[1]: entrant dans le répertoire « /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp »
+/usr/bin/cmake -E cmake_progress_report /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2128053203.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec2128053203.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec2128053203
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2128053203.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTryCompileExec2128053203.dir/CheckFunctionExists.c.o  -o cmTryCompileExec2128053203 -rdynamic -lpthreads 
+/usr/bin/ld: ne peut trouver -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTryCompileExec2128053203] Erreur 1
+make[1]: quittant le répertoire « /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build/CMakeFiles/CMakeTmp »
+make: *** [cmTryCompileExec2128053203/fast] Erreur 2
+
+

@@ -1,0 +1,1 @@
+/usr/bin/c++   -g -Wall -O3 -std=gnu++11    CMakeFiles/ensitsp.dir/src/tsp-genmap.c.o CMakeFiles/ensitsp.dir/src/tsp-job.c.o CMakeFiles/ensitsp.dir/src/tsp-main-para.c.o CMakeFiles/ensitsp.dir/src/tsp-print.c.o CMakeFiles/ensitsp.dir/src/tsp-tsp.c.o CMakeFiles/ensitsp.dir/src/tsp-lp.c.o CMakeFiles/ensitsp.dir/src/tsp-hkbound.cpp.o  -o ensitsp -rdynamic -lpthread -lm -lrt 

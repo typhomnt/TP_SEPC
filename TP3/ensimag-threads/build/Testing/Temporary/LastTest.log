@@ -1,0 +1,27 @@
+Start testing: May 06 19:19 CEST
+----------------------------------------------------------
+1/1 Testing: Tests
+1/1 Test: Tests
+Command: "/home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/tests/validite.pl"
+Directory: /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/build
+"Tests" start time: May 06 19:19 CEST
+Output:
+----------------------------------------------------------
+1..18
+not ok 1 -  15 12387 1 963 == 328
+#   Failed test ' 15 12387 1 963 == 328'
+#   at /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/tests/validite.pl line 47.
+Can't exec "valgrind": Aucun fichier ou dossier de ce type at (eval 6) line 149.
+Can't open 'valgrind -q --tool=drd ../build/ensitsp -q 15 12387 1' with mode '-|': 'Aucun fichier ou dossier de ce type' at /home/maxime/Documents/Ensimag/TP_SEPC/TP_SEPC/TP3/ensimag-threads/tests/validite.pl line 34
+# Looks like you planned 18 tests but ran 1.
+# Looks like you failed 1 test of 1 run.
+# Looks like your test exited with 255 just after 1.
+<end of output>
+Test time =   0.28 sec
+----------------------------------------------------------
+Test Failed.
+"Tests" end time: May 06 19:19 CEST
+"Tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: May 06 19:19 CEST
