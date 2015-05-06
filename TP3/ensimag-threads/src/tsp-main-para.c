@@ -34,7 +34,7 @@ int nb_towns=10;
 /* graine */
 long int myseed= 0;
 /* nombre de threads */
-int nb_threads=4;
+int nb_threads=1;
 
 /* affichage SVG */
 bool affiche_sol= false;
@@ -53,28 +53,36 @@ struct param {
   struct tsp_queue *q;
 };
 typedef struct param param;
-bool ok;
+static tsp_path_t sol;
+static int sol_len;
+static long long int cuts = 0;
+static tsp_path_t solution;
+static  uint64_t vpres=0;
+static struct tsp_queue q;
 void* compute_sol(void* args){
+  bool ok = false;
   pthread_mutex_lock(&mp);
-  ok = empty_queue (((param*)args)->q);
+  ok = empty_queue (&q);
   while (!ok) {
+     pthread_mutex_unlock(&mp); 
+     int hops = 0, len = 0;
+    pthread_mutex_lock(&mp);
+    get_job (&q, solution, &hops, &len, &vpres);
     pthread_mutex_unlock(&mp);
-    ((param*)args)->hops = 0; 
-    ((param*)args)-> len = 0;
-    get_job (((param*)args)->q, ((param*)args)->path, &((param*)args)->hops, &((param*)args)->len, &((param*)args)->vpres);
     // le noeud est moins bon que la solution courante
     if (minimum < INT_MAX
-	&& (nb_towns - ((param*)args)->hops) > 10
-	&& ( (lower_bound_using_hk(((param*)args)->path,((param*)args)->hops , ((param*)args)->len,((param*)args)->vpres )) >= minimum
-	     || (lower_bound_using_lp(((param*)args)->path,((param*)args)->hops , ((param*)args)->len,((param*)args)->vpres)) >= minimum)
+	&& (nb_towns - hops) > 10
+	&& ( (lower_bound_using_hk(solution,hops , len, vpres )) >= minimum
+	     || (lower_bound_using_lp(solution,hops , len,vpres)) >= minimum)
 	)
 
       continue;
 
-    tsp (((param*)args)->hops ,((param*)args)->len, ((param*)args)->vpres, ((param*)args)->path,((param*)args)->cuts , ((param*)args)->sol,((param*)args)->sol_len );
+    tsp (hops ,len, vpres, solution,&cuts , sol,&sol_len );
       pthread_mutex_lock(&mp);
-      ok = empty_queue (((param*)args)->q);
+      ok = empty_queue (&q);
   }
+  pthread_mutex_unlock(&mp);
   return NULL;
 }
 
@@ -112,11 +120,6 @@ int main (int argc, char **argv)
 {
     unsigned long long perf;
     tsp_path_t path;
-    uint64_t vpres=0;
-    tsp_path_t sol;
-    int sol_len;
-    long long int cuts = 0;
-    struct tsp_queue q;
     struct timespec t1, t2;
     pthread_t th[nb_threads];
     /* lire les arguments */
@@ -167,12 +170,11 @@ int main (int argc, char **argv)
     no_more_jobs (&q);
    
     /* calculer chacun des travaux */
-    tsp_path_t solution;
     memset (solution, -1, MAX_TOWNS * sizeof (int));
     solution[0] = 0;
     
     for(int i = 0 ; i < nb_threads ; i++){
-	struct param * arg = malloc(sizeof(param*));
+	/*	struct param * arg = malloc(sizeof(param*));
 	arg->hops = 0;
 	arg->len = 0;
 	arg->path = solution;
@@ -180,8 +182,11 @@ int main (int argc, char **argv)
 	arg->cuts = &cuts;
 	arg->sol_len = &sol_len;
 	arg->sol = sol;
-	pthread_create(&th[i],NULL,compute_sol,(void*)arg);
+	arg->q = &q;*/
+	pthread_create(&th[i],NULL,compute_sol,NULL);
     }
+    for (int i = 0; i < nb_threads; i++)
+         pthread_join(th[i], NULL);
     
     clock_gettime (CLOCK_REALTIME, &t2);
 
